@@ -1,0 +1,39 @@
+{
+    "api": {
+        "version": 1
+    },
+    "swagger": {
+        "path": "docs"
+    },
+    "applications": {
+        "staging-corsair": {
+            "type": "ecs",
+            "taskDefinition": "staging-corsair",
+            "serviceName": "staging-corsair",
+            "clusterName": "staging-web-services",
+            "repository": "corsair",
+            "available-tags": [
+                "develop",
+                "staging",
+                "release-*"
+            ]
+        }
+    },
+    "jwt": {
+        "secret": "m8TzvPrCn9LuJJzZEqBrlowNAsdfASdf"
+    },
+    "users": [
+        {
+            "user": "test",
+            "password": "test"
+        }
+    ],
+    "connection": {
+        "host": "localhost",
+        "port": 4000
+    },
+    "googleAuth": {
+        "clientID": "388603945830-tcev0kl0min5mp493eqbcnvlg8ff3v1a.apps.googleusercontent.com",
+        "clientSecret": "m8TzvPrCn9LuJJzZEqBrlowN"
+    }
+}
