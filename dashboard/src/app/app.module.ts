@@ -1,6 +1,10 @@
+import { DeploysModule } from './deploys/deploys.module';
+import { ApplicationsModule } from './applications/applications.module';
+import { AppMaterialModule } from './app-material.module';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
+import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
 @NgModule({
@@ -8,7 +12,11 @@ import { AppComponent } from './app.component';
     AppComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    AppMaterialModule,
+    AppRoutingModule,
+    ApplicationsModule,
+    DeploysModule
   ],
   providers: [],
   bootstrap: [AppComponent]

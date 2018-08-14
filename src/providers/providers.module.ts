@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common';
-import { Amazon, Config } from '.';
+import { AmazonEcs, Config } from '.';
 
 @Module({
-  imports: [],
-  controllers: [],
-  providers: [Amazon, Config],
-  exports: [Amazon, Config],
+  providers: [AmazonEcs, Config],
+  exports: [AmazonEcs, Config],
 })
 export class ProvidersModule {}

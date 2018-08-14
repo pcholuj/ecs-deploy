@@ -1,24 +1,24 @@
 {
     "api": {
-        "version": 1
+        "version": 1,
+        "port": 3000
     },
     "swagger": {
         "path": "docs"
     },
-    "applications": {
-        "staging-corsair": {
-            "type": "ecs",
-            "taskDefinition": "staging-corsair",
-            "serviceName": "staging-corsair",
-            "clusterName": "staging-web-services",
-            "repository": "corsair",
-            "available-tags": [
-                "develop",
-                "staging",
-                "release-*"
-            ]
-        }
-    },
+    "applications": [{
+        "name": "staging-corsair",
+        "type": "ecs",
+        "taskDefinition": "staging-corsair",
+        "serviceName": "staging-corsair",
+        "clusterName": "staging-web-services",
+        "repository": "corsair",
+        "available-tags": [
+            "develop",
+            "staging",
+            "release-*"
+        ]
+    }],
     "jwt": {
         "secret": "m8TzvPrCn9LuJJzZEqBrlowNAsdfASdf"
     },

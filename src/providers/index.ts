@@ -1,3 +1,3 @@
-export * from './config';
-export * from './amazon';
-export * from './providers.module';
+export * from '@providers/config';
+export * from '@providers/amazon-ecs';
+export * from '@providers/providers.module';

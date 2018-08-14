@@ -7,7 +7,7 @@ export const DEPLOYMENT_STATUS_ERROR = 2;
 export const DEPLOYMENT_STATUS_DONE = 3;
 
 @Injectable()
-export class Amazon {
+export class AmazonEcs {
 
     private sdk: AWS.ECS;
     private ecrSdk: AWS.ECR;
@@ -25,59 +25,16 @@ export class Amazon {
         }).promise();
     }
 
-    public updateTaskDefinition(definitionName: string, tag: string) {
-        console.info(`[AWS][ECS] - Updating task definition for ${definitionName}:${tag}`);
-
-        return this.getTaskDefinition(definitionName).then((response) => {
-            const taskDefinition = response.taskDefinition;
-
-            if (!taskDefinition) {
-                throw new Error('[AWS][ECS] - Task definition not found');
-            }
-
-            if (!taskDefinition.containerDefinitions) {
-                throw new Error('[AWS][ECS] - Container definitions not found');
-            }
-
-            taskDefinition.containerDefinitions = taskDefinition.containerDefinitions.map((tdc) => {
-                tdc.image = tdc.image ? this.updateImageVersion(tdc.image, tag) : '';
-                return tdc;
-            });
-
-            return this.sdk.registerTaskDefinition({
-                family: definitionName,
-                taskRoleArn: taskDefinition.taskRoleArn,
-                executionRoleArn: taskDefinition.executionRoleArn,
-                networkMode: taskDefinition.networkMode,
-                containerDefinitions: taskDefinition.containerDefinitions,
-                volumes: taskDefinition.volumes,
-                placementConstraints: taskDefinition.placementConstraints,
-                requiresCompatibilities: taskDefinition.requiresCompatibilities,
-                cpu: taskDefinition.cpu,
-                memory: taskDefinition.memory,
-            }).promise().then((response) => {
-                if (response.taskDefinition) {
-                    console.info(`[AWS][ECS] - Registred task definition: ${definitionName}:${tag} - ${response.taskDefinition.taskDefinitionArn}`);
-                    return response.taskDefinition.taskDefinitionArn;
-                }
-
-                throw new Error(`[AWS][ECS] -Task definition ${definitionName} not registred. Missing arn`);
-            });
-        });
-    }
-
-    public updateService(name, taskArn) {
+    public getRepositoryList(name: string) {
         const app = this.getApplication(name);
 
-        return this.sdk.updateService({
-            service: app.serviceName,
-            cluster: app.clusterName,
-            taskDefinition: taskArn,
+        return this.ecrSdk.listImages({
+            repositoryName: app.repository,
         }).promise();
     }
 
     public deploy(name, tag) {
-        return this.checkRepository(name, tag).then((res) => {
+        return this.checkRepository(name, tag).then(() => {
             console.info(`[AWS][ECS] - Service deploy started ${name}:${tag}`);
 
             return this.updateTaskDefinition(name, tag).then((taskArn) => {
@@ -162,6 +119,61 @@ export class Amazon {
         });
     }
 
+    private updateTaskDefinition(definitionName: string, tag: string) {
+        console.info(`[AWS][ECS] - Updating task definition for ${definitionName}:${tag}`);
+
+        return this.getTaskDefinition(definitionName).then((response) => {
+            const taskDefinition = response.taskDefinition;
+
+            if (!taskDefinition) {
+                throw new Error('[AWS][ECS] - Task definition not found');
+            }
+
+            if (!taskDefinition.containerDefinitions) {
+                throw new Error('[AWS][ECS] - Container definitions not found');
+            }
+
+            taskDefinition.containerDefinitions = taskDefinition.containerDefinitions.map((tdc) => {
+                tdc.image = tdc.image ? this.updateImageVersion(tdc.image, tag) : '';
+                return tdc;
+            });
+
+            const newTaskDefinition = {
+                family: definitionName,
+                taskRoleArn: taskDefinition.taskRoleArn,
+                executionRoleArn: taskDefinition.executionRoleArn,
+                networkMode: taskDefinition.networkMode,
+                containerDefinitions: taskDefinition.containerDefinitions,
+                volumes: taskDefinition.volumes,
+                placementConstraints: taskDefinition.placementConstraints,
+                requiresCompatibilities: taskDefinition.requiresCompatibilities,
+                cpu: taskDefinition.cpu,
+                memory: taskDefinition.memory,
+            };
+
+            return this.sdk.registerTaskDefinition(newTaskDefinition).promise().then((registerRes) => {
+                if (registerRes.taskDefinition) {
+                    console.info(`[AWS][ECS] - Register task definition:
+                                ${definitionName}:${tag} - ${registerRes.taskDefinition.taskDefinitionArn}`);
+
+                    return registerRes.taskDefinition.taskDefinitionArn;
+                }
+
+                throw new Error(`[AWS][ECS] - Task definition ${definitionName} not registered. Missing arn`);
+            });
+        });
+    }
+
+    private updateService(name, taskArn) {
+        const app = this.getApplication(name);
+
+        return this.sdk.updateService({
+            service: app.serviceName,
+            cluster: app.clusterName,
+            taskDefinition: taskArn,
+        }).promise();
+    }
+
     private checkRepository(name, tag) {
         const app = this.getApplication(name);
 
@@ -169,7 +181,7 @@ export class Amazon {
             repositoryName: app.repository,
         }).promise().then((results) => {
             if (!results.imageIds) {
-                throw new Error(`[AWS][ECS] - Image ${name}:${tag} not found in repository`);
+                throw new Error(`[AWS][ECS] - Image ${name} not found`);
             }
 
             const exists = results.imageIds.some((el) => {
@@ -183,11 +195,19 @@ export class Amazon {
     }
 
     private getApplication(name) {
-        if (!this.config.has(`services.ecs.${name}`)) {
+        if (!this.config.has(`applications`)) {
             throw new Error(`[AWS][ECS] - Application ${name} not found in config`);
         }
 
-        return this.config.get(`services.ecs.${name}`);
+        const applications = this.config.get('applications');
+
+        for (const i in applications) {
+            if (applications[i].name === name && applications[i].type === 'esc') {
+                return applications[i];
+            }
+        }
+
+        throw new Error(`[AWS][ECS] - Application ${name} not found in config`);
     }
 
     private updateImageVersion(image: string, version: string) {

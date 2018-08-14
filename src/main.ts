@@ -17,6 +17,6 @@ async function bootstrap() {
   }
 
   app.setGlobalPrefix(config.versionPath());
-  await app.listen(3000);
+  await app.listen(config.get('api.port') || 3000);
 }
 bootstrap();

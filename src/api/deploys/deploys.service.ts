@@ -1,17 +1,20 @@
-import { Amazon } from 'providers/amazon';
+import { AmazonEcs } from '@providers/amazon-ecs';
 import { Injectable, Inject } from '@nestjs/common';
 
 @Injectable()
 export class DeploysService {
 
     constructor(
-        @Inject('Amazon') private readonly amazon: Amazon,
+        @Inject('AmazonEcs') private readonly amazon: AmazonEcs,
     ) {
 
     }
 
+    public getTasks(name: string) {
+        return this.amazon.getTaskDefinition(name);
+    }
+
     public deploy(name: string, tag: string) {
-        // validate name
         return this.amazon.deploy(name, tag);
     }
 
