@@ -3,22 +3,22 @@
         "version": 1,
         "port": 3000
     },
+    "db": {
+        "type": "postgres",
+        "host": "localhost",
+        "username": "example",
+        "password": "postgres",
+        "database": "postgres",
+        "synchronize": true
+    },
     "swagger": {
         "path": "docs"
     },
-    "applications": [{
-        "name": "staging-corsair",
-        "type": "ecs",
-        "taskDefinition": "staging-corsair",
-        "serviceName": "staging-corsair",
-        "clusterName": "staging-web-services",
-        "repository": "corsair",
-        "available-tags": [
-            "develop",
-            "staging",
-            "release-*"
-        ]
-    }],
+    "deployers": {
+        "ecs": {
+            "repositoryUrl": "593058860426.dkr.ecr.us-east-1.amazonaws.com"
+        }
+    },
     "jwt": {
         "secret": "m8TzvPrCn9LuJJzZEqBrlowNAsdfASdf"
     },

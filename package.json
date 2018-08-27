@@ -21,14 +21,17 @@
     "@nestjs/core": "^5.1.0",
     "@nestjs/passport": "^1.1.0",
     "@nestjs/swagger": "^2.2.0",
+    "@nestjs/typeorm": "^5.1.0",
     "aws-sdk": "^2.286.2",
     "convict": "^4.3.2",
     "fastify-formbody": "^2.0.1",
     "jsonwebtoken": "^8.3.0",
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
+    "pg": "^7.4.3",
     "reflect-metadata": "^0.1.12",
     "rxjs": "^6.2.2",
+    "typeorm": "^0.2.7",
     "typescript": "^3.0.1"
   },
   "devDependencies": {
